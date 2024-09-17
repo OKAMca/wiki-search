@@ -26,7 +26,7 @@ export default function SearchOutline() {
       {data?.data.map((doc) => (
         <List.Item
           key={doc.id}
-          title={doc.title}
+          title={doc.title || "Untitled Document"}
           subtitle={doc.context}
           actions={
             <ActionPanel>

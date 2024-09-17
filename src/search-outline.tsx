@@ -1,7 +1,7 @@
 import { List, ActionPanel, Action, showToast, Toast, Detail, getPreferenceValues } from "@raycast/api";
 import { useState } from "react";
 import { usePromise } from "@raycast/utils";
-import { searchDocuments, Document } from "../api/outline";
+import { searchDocuments, Document } from "./api/outline";
 
 export default function SearchOutline() {
   const [searchText, setSearchText] = useState("");
@@ -33,10 +33,7 @@ export default function SearchOutline() {
           subtitle={doc.context}
           actions={
             <ActionPanel>
-              <Action.Push
-                title="View Document"
-                target={<DocumentDetail document={doc} />}
-              />
+              <Action.Push title="View Document" target={<DocumentDetail document={doc} />} />
               <Action.OpenInBrowser url={`${outlineUrl}${doc.url}`} />
             </ActionPanel>
           }

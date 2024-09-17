@@ -20,35 +20,36 @@ export interface Document {
   };
 }
 
+interface SearchResponse {
+  data: Document[];
+}
+
 export function useSearchDocuments(query: string) {
   const { outlineUrl, apiToken } = getPreferenceValues<Preferences>();
 
   console.log(`Searching Outline at URL: ${outlineUrl}`);
   console.log(`Search query: ${query}`);
 
-  return useFetch<{ data: Document[] }>(`${outlineUrl}/api/documents.search`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiToken}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      query: query,
-      limit: 100,
-    }),
-    onError: (error) => {
-      console.error("Error in useSearchDocuments:", error);
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Search Error",
-        message: `Failed to search documents: ${error.message}`,
-      });
-    },
-    onWillExecute: (url, options) => {
-      console.log("Executing search with options:", JSON.stringify(options, null, 2));
-    },
-    onData: (data) => {
-      console.log(`Received ${data.data.length} search results`);
-    },
-  });
+  return useFetch<SearchResponse>(
+    `${outlineUrl}/api/documents.search`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query: query,
+        limit: 100,
+      }),
+      onError: (error) => {
+        console.error("Error in useSearchDocuments:", error);
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Search Error",
+          message: `Failed to search documents: ${error.message}`,
+        });
+      },
+    }
+  );
 }

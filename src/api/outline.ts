@@ -1,4 +1,4 @@
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
 interface Preferences {
@@ -23,6 +23,9 @@ export interface Document {
 export function useSearchDocuments(query: string) {
   const { outlineUrl, apiToken } = getPreferenceValues<Preferences>();
 
+  console.log(`Searching Outline at URL: ${outlineUrl}`);
+  console.log(`Search query: ${query}`);
+
   return useFetch<{ data: Document[] }>(`${outlineUrl}/api/documents.search`, {
     method: "POST",
     headers: {
@@ -33,5 +36,19 @@ export function useSearchDocuments(query: string) {
       query: query,
       limit: 100,
     }),
+    onError: (error) => {
+      console.error("Error in useSearchDocuments:", error);
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Search Error",
+        message: `Failed to search documents: ${error.message}`,
+      });
+    },
+    onWillExecute: (url, options) => {
+      console.log("Executing search with options:", JSON.stringify(options, null, 2));
+    },
+    onData: (data) => {
+      console.log(`Received ${data.data.length} search results`);
+    },
   });
 }

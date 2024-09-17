@@ -44,6 +44,9 @@ export function useSearchDocuments(query: string, options?: { execute?: boolean 
         query: query,
         limit: 100,
       }),
+      onData: (data) => {
+        console.log("API Response:", JSON.stringify(data, null, 2));
+      },
       onError: (error) => {
         console.error("Error in useSearchDocuments:", error);
         showToast({

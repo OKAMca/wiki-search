@@ -1,47 +1,15 @@
 import { List, ActionPanel, Action, showToast, Toast, Detail, getPreferenceValues } from "@raycast/api";
 import { useState } from "react";
-import { useFetch } from "@raycast/utils";
-
-interface Preferences {
-  outlineUrl: string;
-  apiToken: string;
-}
-
-interface Document {
-  id: string;
-  title: string;
-  text: string;
-  context: string;
-  url: string;
-  collectionName: string;
-  createdAt: string;
-  updatedAt: string;
-  createdBy: {
-    name: string;
-  };
-}
+import { usePromise } from "@raycast/utils";
+import { searchDocuments, Document } from "../api/outline";
 
 export default function SearchOutline() {
   const [searchText, setSearchText] = useState("");
-  const { outlineUrl, apiToken } = getPreferenceValues<Preferences>();
+  const { outlineUrl } = getPreferenceValues<{ outlineUrl: string }>();
 
-  const { data, isLoading, error } = useFetch<{ data: Document[] }>(
-    `${outlineUrl}/api/documents.search`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        query: searchText,
-        limit: 100,
-      }),
-    },
-    {
-      execute: searchText.length > 0,
-    }
-  );
+  const { data, isLoading, error } = usePromise(searchDocuments, [searchText], {
+    execute: searchText.length > 0,
+  });
 
   if (error) {
     showToast({
@@ -58,7 +26,7 @@ export default function SearchOutline() {
       searchBarPlaceholder="Search Outline documents..."
       throttle
     >
-      {data?.data.map((doc) => (
+      {data?.map((doc) => (
         <List.Item
           key={doc.id}
           title={doc.title}

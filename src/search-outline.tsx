@@ -1,16 +1,33 @@
 import { List, ActionPanel, Action, showToast, Toast, Detail, getPreferenceValues } from "@raycast/api";
-import { useState } from "react";
-import { useSearchDocuments, Document } from "./api/outline";
+import { useState, useEffect, useCallback } from "react";
+import { useSearchDocuments, Document, SearchResponseItem } from "./api/outline";
+
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}
 
 export default function SearchOutline() {
   const [searchText, setSearchText] = useState("");
+  const debouncedSearchText = useDebounce(searchText, 100);
   const { outlineUrl } = getPreferenceValues<{ outlineUrl: string }>();
 
-  const { data, isLoading, error } = useSearchDocuments(searchText, {
-    execute: searchText.trim().length > 0,
+  const { data, isLoading, error } = useSearchDocuments(debouncedSearchText, {
+    execute: debouncedSearchText.trim().length > 0,
   });
 
-  if (error && searchText.trim().length > 0) {
+  if (error && debouncedSearchText.trim().length > 0) {
     showToast({
       style: Toast.Style.Failure,
       title: "Failed to search documents",
@@ -25,15 +42,15 @@ export default function SearchOutline() {
       searchBarPlaceholder="Search Outline documents..."
       throttle
     >
-      {data?.data.map((doc) => (
+      {data?.data.map((item: SearchResponseItem) => (
         <List.Item
-          key={doc.id}
-          title={doc.title || "Untitled Document"}
-          subtitle={doc.context}
+          key={item.document.id}
+          title={item.document.title || "Untitled Document"}
+          subtitle={item.context}
           actions={
             <ActionPanel>
-              <Action.Push title="View Document" target={<DocumentDetail document={doc} />} />
-              <Action.OpenInBrowser url={`${outlineUrl}${doc.url}`} />
+              <Action.Push title="View Document" target={<DocumentDetail document={item.document} />} />
+              <Action.OpenInBrowser url={`${outlineUrl}${item.document.url}`} />
             </ActionPanel>
           }
         />
@@ -48,10 +65,8 @@ function DocumentDetail({ document }: { document: Document }) {
       markdown={document.text}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label title="Collection" text={document.collectionName} />
-          <Detail.Metadata.Label title="Created" text={new Date(document.createdAt).toLocaleString()} />
-          <Detail.Metadata.Label title="Updated" text={new Date(document.updatedAt).toLocaleString()} />
-          <Detail.Metadata.Label title="Author" text={document.createdBy.name} />
+          <Detail.Metadata.Label title="ID" text={document.urlId} />
+          <Detail.Metadata.Label title="URL" text={document.url} />
         </Detail.Metadata>
       }
     />

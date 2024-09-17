@@ -8,20 +8,26 @@ interface Preferences {
 
 export interface Document {
   id: string;
+  urlId: string;
+  url: string;
   title: string;
   text: string;
+}
+
+export interface SearchResponseItem {
+  ranking: number;
   context: string;
-  url: string;
-  collectionName: string;
-  createdAt: string;
-  updatedAt: string;
-  createdBy: {
-    name: string;
-  };
+  document: Document;
 }
 
 interface SearchResponse {
-  data: Document[];
+  pagination: {
+    limit: number;
+    offset: number;
+    nextPath: string;
+    total: number;
+  };
+  data: SearchResponseItem[];
 }
 
 export function useSearchDocuments(query: string, options?: { execute?: boolean }) {

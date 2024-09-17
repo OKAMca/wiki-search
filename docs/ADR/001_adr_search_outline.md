@@ -1,72 +1,80 @@
- # ADR: Integrating Outline Wiki Search in Raycast Extension
+# ADR: Integrating Outline Wiki Search in Raycast Extension
 
- ## Context
- We need to implement a feature in our Raycast Extension that allows users to search and display documents from an Outline Wiki
- instance. The primary goal is to enable employees to quickly lookup internal documentation without context switching.
+[... existing content unchanged ...]
 
- ## Decision
- We will integrate the Outline Wiki API's search endpoint into our Raycast Extension to enable document search and display
- functionality.
+## New Feature: Collection-based Search Filtering
 
- ## Consequences
- - Positive: Users can quickly search and access Outline Wiki documents from Raycast.
- - Positive: Leverages existing Outline Wiki API, reducing development time.
- - Negative: Requires handling API authentication and potential rate limiting.
+### Context
+To enhance the search functionality, we want to allow users to filter their search results by selecting a specific collection. This will provide more targeted and relevant search results.
 
- ## Technical Details
- - Search Endpoint: POST /documents.search
- - Request Format: JSON
- - Authentication: Bearer token
+### Decision
+We will implement a feature to query and display Outline collections, allowing users to select a collection before performing a search. The search will then be limited to the selected collection.
 
- ## Requirements
+### Technical Details
+- Collections Endpoint: POST /collections.list
+  - Request format: JSON
+  - Parameters:
+    * limit: Number of collections to return (e.g., 25)
+  - Response format: JSON
+    * data: Array of collection objects
+    * pagination: Object containing offset and limit
+- Search Endpoint (updated): POST /documents.search
+  - New parameter: `collectionId` (optional)
 
- 1. Configuration:
-    - Allow users to input their Outline Wiki URL and API token in Raycast preferences.
-    - Implement secure storage for these credentials.
-    - If possible, add a "Test Connection" action in the settings view.
+### Collection Object Structure
+```json
+{
+  "id": string,
+  "name": string,
+  "description": string,
+  "sort": {
+    "field": string,
+    "direction": string
+  },
+  "index": string,
+  "color": string,
+  "icon": string,
+  "permission": string,
+  "createdAt": string (ISO 8601 date),
+  "updatedAt": string (ISO 8601 date),
+  "deletedAt": string (ISO 8601 date) | null
+}
+```
 
- 2. Search Functionality:
-    - Develop a search command that accepts user input.
-    - Send search queries to the Outline Wiki API using the following parameters:
-      * query: The user's search term
-      * limit: Set to 100 results
-    - Parse and format the API response for display in Raycast.
+### Requirements
 
- 3. Result Display:
-    - Create a list view to display search results, showing:
-      * Document title
-      * Context snippet from the API response
-    - Implement a detail view for selected documents, including:
-      * Markdown content displayed on the left
-      * Sidebar with metadata (e.g., collection, last updated, author)
+1. Collection Querying:
+   - Implement a function to fetch collections from the Outline API using the POST /collections.list endpoint.
+   - Handle pagination using the provided pagination object in the response.
+   - Store relevant collection data, primarily `id` and `name`, for use in the UI and search queries.
+   - Implement error handling for collection fetching.
 
- 4. Error Handling:
-    - Implement checks to ensure proper configuration of URL and token.
-    - Generate appropriate alerts for authentication failures.
-    - Provide user-friendly error messages for network issues or unexpected responses.
+2. User Interface Updates:
+   - Add a dropdown or list for collection selection before the search input.
+   - Display collection names to the user, using the `name` field from the collection object.
+   - Use the `id` field when passing the selected collection to the search query.
+   - Include an "All Collections" option as the default.
+   - Consider using the `color` field to enhance the visual representation of collections in the UI.
 
- 5. User Experience:
-    - Limit search results to 100 items for this initial version.
-    - Provide an action to open the selected document in a web browser for editing.
+3. Search Functionality Update:
+   - Modify the search function to include the selected collection `id` in the API request.
+   - Update the `useSearchDocuments` hook to accept an optional `collectionId` parameter.
 
- 6. Performance:
-    - No local caching or indexing in this initial version.
+4. Performance Considerations:
+   - Implement caching for the collections list to minimize API calls.
+   - Implement pagination or lazy loading for collections, utilizing the pagination object in the API response.
 
- ## Future Considerations (v1.1)
- - Implement advanced search features (filtering by collection, date range).
- - Consider local indexing for faster initial results.
- - Explore caching mechanisms to improve performance.
+### Implementation Steps
 
- ## Implementation Steps
+1. Update the API module to include a function for fetching collections using the POST /collections.list endpoint.
+2. Implement pagination logic for fetching all collections, using the pagination object in the response.
+3. Create interfaces or types for the collection and pagination objects.
+4. Implement a new React component for collection selection, considering how to handle a potentially large number of collections.
+5. Modify the search command to incorporate collection selection.
+6. Update the `useSearchDocuments` hook to handle the optional `collectionId`.
+7. Implement caching for the collections list.
+8. Update error handling to account for collection-related errors.
+9. Update tests to cover the new functionality, including pagination of collections.
+10. Update user documentation to explain the new feature and any limitations related to the number of collections.
 
- 1. Set up the basic Raycast Extension structure.
- 2. Implement configuration management for Outline Wiki URL and API token.
- 3. Create an API module to handle Outline Wiki API requests.
- 4. Develop the search command using the Outline API.
- 5. Implement the results list view.
- 6. Create the document detail view with markdown rendering and metadata sidebar.
- 7. Add error handling and user-friendly messages.
- 8. Implement the "open in browser" action for search results.
- 9. If possible, add the "Test Connection" feature in settings.
- 10. Conduct testing and refinement.
- 11. Update documentation and prepare for release.
+[... rest of the existing content unchanged ...]

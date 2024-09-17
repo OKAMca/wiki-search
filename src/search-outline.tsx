@@ -6,9 +6,11 @@ export default function SearchOutline() {
   const [searchText, setSearchText] = useState("");
   const { outlineUrl } = getPreferenceValues<{ outlineUrl: string }>();
 
-  const { data, isLoading, error } = useSearchDocuments(searchText);
+  const { data, isLoading, error } = useSearchDocuments(searchText, {
+    execute: searchText.trim().length > 0,
+  });
 
-  if (error) {
+  if (error && searchText.trim().length > 0) {
     showToast({
       style: Toast.Style.Failure,
       title: "Failed to search documents",

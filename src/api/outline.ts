@@ -24,7 +24,7 @@ interface SearchResponse {
   data: Document[];
 }
 
-export function useSearchDocuments(query: string) {
+export function useSearchDocuments(query: string, options?: { execute?: boolean }) {
   const { outlineUrl, apiToken } = getPreferenceValues<Preferences>();
   const searchUrl = `${outlineUrl}/api/documents.search`;
 
@@ -34,6 +34,7 @@ export function useSearchDocuments(query: string) {
   return useFetch<SearchResponse>(
     searchUrl,
     {
+      ...options,
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiToken}`,

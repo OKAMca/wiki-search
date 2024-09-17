@@ -26,12 +26,13 @@ interface SearchResponse {
 
 export function useSearchDocuments(query: string) {
   const { outlineUrl, apiToken } = getPreferenceValues<Preferences>();
+  const searchUrl = `${outlineUrl}/api/documents.search`;
 
-  console.log(`Searching Outline at URL: ${outlineUrl}`);
+  console.log(`Searching Outline at URL: ${searchUrl}`);
   console.log(`Search query: ${query}`);
 
   return useFetch<SearchResponse>(
-    `${outlineUrl}/api/documents.search`,
+    searchUrl,
     {
       method: "POST",
       headers: {

@@ -1,15 +1,12 @@
 import { List, ActionPanel, Action, showToast, Toast, Detail, getPreferenceValues } from "@raycast/api";
 import { useState } from "react";
-import { usePromise } from "@raycast/utils";
-import { searchDocuments, Document } from "./api/outline";
+import { useSearchDocuments, Document } from "./api/outline";
 
 export default function SearchOutline() {
   const [searchText, setSearchText] = useState("");
   const { outlineUrl } = getPreferenceValues<{ outlineUrl: string }>();
 
-  const { data, isLoading, error } = usePromise(searchDocuments, [searchText], {
-    execute: searchText.length > 0,
-  });
+  const { data, isLoading, error } = useSearchDocuments(searchText);
 
   if (error) {
     showToast({
@@ -26,7 +23,7 @@ export default function SearchOutline() {
       searchBarPlaceholder="Search Outline documents..."
       throttle
     >
-      {data?.map((doc) => (
+      {data?.data.map((doc) => (
         <List.Item
           key={doc.id}
           title={doc.title}

@@ -1,4 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
 
 interface Preferences {
   outlineUrl: string;
@@ -19,10 +20,10 @@ export interface Document {
   };
 }
 
-export async function searchDocuments(query: string): Promise<Document[]> {
+export function useSearchDocuments(query: string) {
   const { outlineUrl, apiToken } = getPreferenceValues<Preferences>();
 
-  const response = await fetch(`${outlineUrl}/api/documents.search`, {
+  return useFetch<{ data: Document[] }>(`${outlineUrl}/api/documents.search`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiToken}`,
@@ -33,11 +34,4 @@ export async function searchDocuments(query: string): Promise<Document[]> {
       limit: 100,
     }),
   });
-
-  if (!response.ok) {
-    throw new Error(`Failed to search documents: ${response.statusText}`);
-  }
-
-  const data = await response.json();
-  return data.data;
 }

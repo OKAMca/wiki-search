@@ -1,6 +1,23 @@
-import { List, ActionPanel, Action, showToast, Toast, getPreferenceValues, Icon } from "@raycast/api";
+import { List, ActionPanel, Action, showToast, Toast, getPreferenceValues, Icon, Detail } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { useSearchDocuments, Document, SearchResponseItem, Collection, useFetchCollections } from "./api/outline";
+
+function DocumentDetailView({ document }: { document: Document }) {
+  const { outlineUrl } = getPreferenceValues<{ outlineUrl: string }>();
+
+  return (
+    <Detail
+      markdown={document.text}
+      metadata={
+        <Detail.Metadata>
+          <Detail.Metadata.Label title="Title" text={document.title} />
+          <Detail.Metadata.Label title="Collection" text={document.collectionName || "Unknown Collection"} />
+          <Detail.Metadata.Link title="Open in Browser" target={`${outlineUrl}${document.url}`} text="Open" />
+        </Detail.Metadata>
+      }
+    />
+  );
+}
 
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
@@ -107,7 +124,10 @@ export default function SearchOutline() {
             }
             actions={
               <ActionPanel>
-                <Action title="Preview Document" onAction={() => setSelectedDocument(item.document)} />
+                <Action.Push
+                  title="Preview Document"
+                  target={<DocumentDetailView document={item.document} />}
+                />
                 <Action.OpenInBrowser url={`${outlineUrl}${item.document.url}`} />
               </ActionPanel>
             }

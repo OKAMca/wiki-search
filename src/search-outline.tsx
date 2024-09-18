@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, showToast, Toast, getPreferenceValues, Icon } from "@raycast/api";
+import { List, ActionPanel, Action, showToast, Toast, getPreferenceValues, Icon, Detail } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { useSearchDocuments, Document, SearchResponseItem, Collection, useFetchCollections } from "./api/outline";
 
@@ -104,6 +104,28 @@ export default function SearchOutline() {
             }
             actions={
               <ActionPanel>
+                <Action.Push
+                  title="View Document"
+                  target={
+                    <Detail
+                      markdown={item.document.text}
+                      metadata={
+                        <Detail.Metadata>
+                          <Detail.Metadata.Label title="Title" text={item.document.title} />
+                          <Detail.Metadata.Label
+                            title="Collection"
+                            text={item.document.collectionName || "Unknown Collection"}
+                          />
+                          <Detail.Metadata.Link
+                            title="Open in Browser"
+                            target={`${outlineUrl}${item.document.url}`}
+                            text="Open"
+                          />
+                        </Detail.Metadata>
+                      }
+                    />
+                  }
+                />
                 <Action.OpenInBrowser url={`${outlineUrl}${item.document.url}`} />
               </ActionPanel>
             }

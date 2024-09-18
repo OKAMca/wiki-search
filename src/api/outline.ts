@@ -36,12 +36,6 @@ export interface Collection {
   color: string;
 }
 
-export interface Collection {
-  id: string;
-  name: string;
-  color: string;
-}
-
 export interface CollectionsResponse {
   data: Collection[];
   pagination: {
@@ -54,17 +48,14 @@ export function useFetchCollections() {
   const { outlineUrl, apiToken } = getPreferenceValues<Preferences>();
   const collectionsUrl = `${outlineUrl}/api/collections.list`;
 
-  return useFetch<CollectionsResponse>(
-    collectionsUrl,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ limit: 100 }), // Adjust the limit as needed
-    }
-  );
+  return useFetch<CollectionsResponse>(collectionsUrl, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ limit: 100 }), // Adjust the limit as needed
+  });
 }
 
 interface SearchResponse {
@@ -77,12 +68,23 @@ interface SearchResponse {
   data: SearchResponseItem[];
 }
 
-export function useSearchDocuments(query: string, collectionId: string | null, collectionsData: CollectionsResponse | undefined, options?: { execute?: boolean }) {
+export function useSearchDocuments(
+  query: string,
+  collectionId: string | null,
+  collectionsData: CollectionsResponse | undefined,
+  options?: { execute?: boolean }
+) {
   const { outlineUrl, apiToken } = getPreferenceValues<Preferences>();
   const searchUrl = `${outlineUrl}/api/documents.search`;
 
   console.log(`Searching Outline at URL: ${searchUrl}`);
-  console.log(`Search query: ${query}${collectionId ? ` in collection: ${collectionsData?.data.find(c => c.id === collectionId)?.name || collectionId}` : ''}`);
+  console.log(
+    `Search query: ${query}${
+      collectionId
+        ? ` in collection: ${collectionsData?.data.find((c) => c.id === collectionId)?.name || collectionId}`
+        : ""
+    }`
+  );
   console.log(`Collection ID: ${collectionId}`);
 
   const body: { query: string; limit: number; collectionId?: string } = {
@@ -94,35 +96,33 @@ export function useSearchDocuments(query: string, collectionId: string | null, c
     body.collectionId = collectionId;
   }
 
-  return useFetch<SearchResponse>(
-    searchUrl,
-    {
-      ...options,
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-      onData: (data) => {
-        console.log("API Response:", JSON.stringify(data, null, 2));
-        // Add collection names to the documents using collectionsData
-        data.data = data.data.map(item => ({
-          ...item,
-          document: {
-            ...item.document,
-            collectionName: collectionsData?.data.find(c => c.id === item.document.collectionId)?.name || "Unknown Collection"
-          }
-        }));
-      },
-      onError: (error) => {
-        console.error("Error in useSearchDocuments:", error);
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Search Error",
-          message: `Failed to search documents: ${error.message}`,
-        });
-      },
-    }
-  );
+  return useFetch<SearchResponse>(searchUrl, {
+    ...options,
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+    onData: (data) => {
+      console.log("API Response:", JSON.stringify(data, null, 2));
+      // Add collection names to the documents using collectionsData
+      data.data = data.data.map((item) => ({
+        ...item,
+        document: {
+          ...item.document,
+          collectionName:
+            collectionsData?.data.find((c) => c.id === item.document.collectionId)?.name || "Unknown Collection",
+        },
+      }));
+    },
+    onError: (error) => {
+      console.error("Error in useSearchDocuments:", error);
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Search Error",
+        message: `Failed to search documents: ${error.message}`,
+      });
+    },
+  });
 }

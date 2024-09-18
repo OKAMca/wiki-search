@@ -7,7 +7,7 @@ export default function SearchOutline() {
   const [selectedCollection, setSelectedCollection] = useState<Collection | null>(null);
   const { outlineUrl } = getPreferenceValues<{ outlineUrl: string }>();
 
-  const { data: collectionsData, isLoading: isLoadingCollections, error: collectionsError } = useFetchCollections();
+  const { data: collectionsData, error: collectionsError } = useFetchCollections();
   const { data, isLoading, error } = useSearchDocuments(searchText, selectedCollection?.id || null, collectionsData, {
     execute: searchText.trim().length > 0,
   });

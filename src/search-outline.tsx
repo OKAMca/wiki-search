@@ -1,23 +1,6 @@
-import { List, ActionPanel, Action, showToast, Toast, getPreferenceValues, Icon, Detail } from "@raycast/api";
+import { List, ActionPanel, Action, showToast, Toast, getPreferenceValues, Icon } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { useSearchDocuments, Document, SearchResponseItem, Collection, useFetchCollections } from "./api/outline";
-
-function DocumentDetailView({ document }: { document: Document }) {
-  const { outlineUrl } = getPreferenceValues<{ outlineUrl: string }>();
-
-  return (
-    <Detail
-      markdown={document.text}
-      metadata={
-        <Detail.Metadata>
-          <Detail.Metadata.Label title="Title" text={document.title} />
-          <Detail.Metadata.Label title="Collection" text={document.collectionName || "Unknown Collection"} />
-          <Detail.Metadata.Link title="Open in Browser" target={`${outlineUrl}${document.url}`} text="Open" />
-        </Detail.Metadata>
-      }
-    />
-  );
-}
 
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
@@ -38,7 +21,6 @@ function useDebounce<T>(value: T, delay: number): T {
 export default function SearchOutline() {
   const [searchText, setSearchText] = useState("");
   const [selectedCollection, setSelectedCollection] = useState<Collection | null>(null);
-  const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
   const debouncedSearchText = useDebounce(searchText, 100);
   const { outlineUrl } = getPreferenceValues<{ outlineUrl: string }>();
 
@@ -103,31 +85,25 @@ export default function SearchOutline() {
             accessories={[{ text: item.document.collectionName || "Unknown Collection" }]}
             detail={
               <List.Item.Detail
-                markdown={selectedDocument?.text || "Select a document to preview"}
+                markdown={item.document.text}
                 metadata={
-                  selectedDocument ? (
-                    <List.Item.Detail.Metadata>
-                      <List.Item.Detail.Metadata.Label title="Title" text={selectedDocument.title} />
-                      <List.Item.Detail.Metadata.Label
-                        title="Collection"
-                        text={selectedDocument.collectionName || "Unknown Collection"}
-                      />
-                      <List.Item.Detail.Metadata.Link
-                        title="Open in Browser"
-                        target={`${outlineUrl}${selectedDocument.url}`}
-                        text="Open"
-                      />
-                    </List.Item.Detail.Metadata>
-                  ) : null
+                  <List.Item.Detail.Metadata>
+                    <List.Item.Detail.Metadata.Label title="Title" text={item.document.title} />
+                    <List.Item.Detail.Metadata.Label
+                      title="Collection"
+                      text={item.document.collectionName || "Unknown Collection"}
+                    />
+                    <List.Item.Detail.Metadata.Link
+                      title="Open in Browser"
+                      target={`${outlineUrl}${item.document.url}`}
+                      text="Open"
+                    />
+                  </List.Item.Detail.Metadata>
                 }
               />
             }
             actions={
               <ActionPanel>
-                <Action.Push
-                  title="Preview Document"
-                  target={<DocumentDetailView document={item.document} />}
-                />
                 <Action.OpenInBrowser url={`${outlineUrl}${item.document.url}`} />
               </ActionPanel>
             }

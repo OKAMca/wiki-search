@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, showToast, Toast, Detail, getPreferenceValues } from "@raycast/api";
+import { List, ActionPanel, Action, showToast, Toast, Detail, getPreferenceValues, Icon } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { useSearchDocuments, Document, SearchResponseItem, Collection, useFetchCollections } from "./api/outline";
 

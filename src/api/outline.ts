@@ -13,6 +13,14 @@ export interface Document {
   title: string;
   text: string;
   collectionName?: string;
+  createdAt: string;
+  updatedAt: string;
+  createdBy: {
+    name: string;
+  };
+  updatedBy: {
+    name: string;
+  };
 }
 
 export interface SearchResponseItem {

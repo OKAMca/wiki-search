@@ -76,6 +76,23 @@ export default function SearchOutline() {
                       title="Collection"
                       text={item.document.collectionName || "Unknown Collection"}
                     />
+                    <List.Item.Detail.Metadata.Label
+                      title="Created At"
+                      text={new Date(item.document.createdAt).toLocaleString()}
+                    />
+                    <List.Item.Detail.Metadata.Label
+                      title="Created By"
+                      text={item.document.createdBy.name}
+                    />
+                    <List.Item.Detail.Metadata.Label
+                      title="Updated At"
+                      text={new Date(item.document.updatedAt).toLocaleString()}
+                    />
+                    <List.Item.Detail.Metadata.Label
+                      title="Updated By"
+                      text={item.document.updatedBy.name}
+                    />
+                    <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Link
                       title="Open in Browser"
                       target={`${outlineUrl}${item.document.url}`}
@@ -99,6 +116,23 @@ export default function SearchOutline() {
                             title="Collection"
                             text={item.document.collectionName || "Unknown Collection"}
                           />
+                          <Detail.Metadata.Label
+                            title="Created At"
+                            text={new Date(item.document.createdAt).toLocaleString()}
+                          />
+                          <Detail.Metadata.Label
+                            title="Created By"
+                            text={item.document.createdBy.name}
+                          />
+                          <Detail.Metadata.Label
+                            title="Updated At"
+                            text={new Date(item.document.updatedAt).toLocaleString()}
+                          />
+                          <Detail.Metadata.Label
+                            title="Updated By"
+                            text={item.document.updatedBy.name}
+                          />
+                          <Detail.Metadata.Separator />
                           <Detail.Metadata.Link
                             title="Open in Browser"
                             target={`${outlineUrl}${item.document.url}`}

@@ -20,6 +20,38 @@ export interface SearchResponseItem {
   document: Document;
 }
 
+export interface Collection {
+  id: string;
+  name: string;
+  color: string;
+}
+
+export interface CollectionsResponse {
+  data: Collection[];
+  pagination: {
+    offset: number;
+    limit: number;
+  };
+}
+
+export async function fetchCollections(): Promise<Collection[]> {
+  const response = await fetch(`${preferences.outlineUrl}/api/collections.list`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${preferences.apiToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ limit: 100 }), // Adjust the limit as needed
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch collections: ${response.statusText}`);
+  }
+
+  const data: CollectionsResponse = await response.json();
+  return data.data;
+}
+
 interface SearchResponse {
   pagination: {
     limit: number;

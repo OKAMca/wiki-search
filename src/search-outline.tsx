@@ -1,6 +1,6 @@
 import { List, ActionPanel, Action, showToast, Toast, Detail, getPreferenceValues } from "@raycast/api";
-import { useState, useEffect, useCallback } from "react";
-import { useSearchDocuments, Document, SearchResponseItem } from "./api/outline";
+import { useState, useEffect } from "react";
+import { useSearchDocuments, Document, SearchResponseItem, Collection, fetchCollections } from "./api/outline";
 
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
@@ -20,12 +20,30 @@ function useDebounce<T>(value: T, delay: number): T {
 
 export default function SearchOutline() {
   const [searchText, setSearchText] = useState("");
+  const [selectedCollection, setSelectedCollection] = useState<Collection | null>(null);
+  const [collections, setCollections] = useState<Collection[]>([]);
   const debouncedSearchText = useDebounce(searchText, 100);
   const { outlineUrl } = getPreferenceValues<{ outlineUrl: string }>();
 
-  const { data, isLoading, error } = useSearchDocuments(debouncedSearchText, {
+  const { data, isLoading, error } = useSearchDocuments(debouncedSearchText, selectedCollection?.id || null, {
     execute: debouncedSearchText.trim().length > 0,
   });
+
+  useEffect(() => {
+    async function loadCollections() {
+      try {
+        const fetchedCollections = await fetchCollections();
+        setCollections(fetchedCollections);
+      } catch (error) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to fetch collections",
+          message: (error as Error).message,
+        });
+      }
+    }
+    loadCollections();
+  }, []);
 
   if (error && debouncedSearchText.trim().length > 0) {
     showToast({
@@ -41,6 +59,23 @@ export default function SearchOutline() {
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search Outline documents..."
       throttle
+      searchBarAccessory={
+        <List.Dropdown
+          tooltip="Select Collection"
+          storeValue={true}
+          onChange={(id) => setSelectedCollection(collections.find((c) => c.id === id) || null)}
+        >
+          <List.Dropdown.Item key="all" title="All Collections" value="" />
+          {collections.map((collection) => (
+            <List.Dropdown.Item
+              key={collection.id}
+              title={collection.name}
+              value={collection.id}
+              icon={{ source: Icon.Circle, tintColor: collection.color }}
+            />
+          ))}
+        </List.Dropdown>
+      }
     >
       {data?.data.map((item: SearchResponseItem) => (
         <List.Item

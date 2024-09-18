@@ -25,7 +25,7 @@ export default function SearchOutline() {
   const { outlineUrl } = getPreferenceValues<{ outlineUrl: string }>();
 
   const { data: collectionsData, isLoading: isLoadingCollections, error: collectionsError } = useFetchCollections();
-  const { data, isLoading, error } = useSearchDocuments(debouncedSearchText, selectedCollection?.id || null, {
+  const { data, isLoading, error } = useSearchDocuments(debouncedSearchText, selectedCollection?.id || null, collectionsData, {
     execute: debouncedSearchText.trim().length > 0,
   });
 

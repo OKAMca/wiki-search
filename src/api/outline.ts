@@ -67,12 +67,12 @@ interface SearchResponse {
   data: SearchResponseItem[];
 }
 
-export function useSearchDocuments(query: string, collectionId: string | null, options?: { execute?: boolean }) {
+export function useSearchDocuments(query: string, collectionId: string | null, collectionsData: CollectionsResponse | undefined, options?: { execute?: boolean }) {
   const { outlineUrl, apiToken } = getPreferenceValues<Preferences>();
   const searchUrl = `${outlineUrl}/api/documents.search`;
 
   console.log(`Searching Outline at URL: ${searchUrl}`);
-  console.log(`Search query: ${query}`);
+  console.log(`Search query: ${query}${collectionId ? ` in collection: ${collectionsData?.data.find(c => c.id === collectionId)?.name || collectionId}` : ''}`);
   console.log(`Collection ID: ${collectionId}`);
 
   const body: { query: string; limit: number; collectionId?: string } = {

@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "outline-search",
-  "title": "Outline Search",
-  "description": "Search in Outline wiki",
+  "name": "wiki-search",
+  "title": "Wiki Search",
+  "description": "Quickly search and access your Outline wiki documents directly from Raycast",
   "icon": "extension-icon.png",
   "author": "DavidAtOkam",
   "owner": "okam",

@@ -76,6 +76,9 @@ export default function SearchOutline() {
           key={item.document.id}
           title={item.document.title || "Untitled Document"}
           subtitle={item.context}
+          accessories={[
+            { text: item.document.collectionName || "Unknown Collection" }
+          ]}
           actions={
             <ActionPanel>
               <Action.Push title="View Document" target={<DocumentDetail document={item.document} />} />

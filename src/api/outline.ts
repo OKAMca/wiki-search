@@ -12,6 +12,7 @@ export interface Document {
   url: string;
   title: string;
   text: string;
+  collectionName?: string;
 }
 
 export interface SearchResponseItem {
@@ -96,6 +97,14 @@ export function useSearchDocuments(query: string, collectionId: string | null, c
       body: JSON.stringify(body),
       onData: (data) => {
         console.log("API Response:", JSON.stringify(data, null, 2));
+        // Add collection names to the documents
+        data.data = data.data.map(item => ({
+          ...item,
+          document: {
+            ...item.document,
+            collectionName: collectionsData?.data.find(c => c.id === item.document.collectionId)?.name || "Unknown Collection"
+          }
+        }));
       },
       onError: (error) => {
         console.error("Error in useSearchDocuments:", error);

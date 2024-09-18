@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, showToast, Toast, Detail, getPreferenceValues, Icon } from "@raycast/api";
+import { List, ActionPanel, Action, showToast, Toast, getPreferenceValues, Icon } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { useSearchDocuments, Document, SearchResponseItem, Collection, useFetchCollections } from "./api/outline";
 
@@ -21,6 +21,7 @@ function useDebounce<T>(value: T, delay: number): T {
 export default function SearchOutline() {
   const [searchText, setSearchText] = useState("");
   const [selectedCollection, setSelectedCollection] = useState<Collection | null>(null);
+  const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
   const debouncedSearchText = useDebounce(searchText, 100);
   const { outlineUrl } = getPreferenceValues<{ outlineUrl: string }>();
 
@@ -53,6 +54,7 @@ export default function SearchOutline() {
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search Outline documents..."
       throttle
+      isShowingDetail
       searchBarAccessory={
         <List.Dropdown
           tooltip="Select Collection"
@@ -71,44 +73,38 @@ export default function SearchOutline() {
         </List.Dropdown>
       }
     >
-      {data?.data.map((item: SearchResponseItem) => (
-        <List.Item
-          key={item.document.id}
-          title={item.document.title || "Untitled Document"}
-          subtitle={item.context}
-          accessories={[
-            { text: item.document.collectionName || "Unknown Collection" }
-          ]}
-          actions={
-            <ActionPanel>
-              <Action.Push title="View Document" target={<DocumentDetail document={item.document} />} />
-              <Action.OpenInBrowser url={`${outlineUrl}${item.document.url}`} />
-            </ActionPanel>
-          }
-        />
-      ))}
+      <List.Section title="Search Results">
+        {data?.data.map((item: SearchResponseItem) => (
+          <List.Item
+            key={item.document.id}
+            title={item.document.title || "Untitled Document"}
+            subtitle={item.context}
+            accessories={[
+              { text: item.document.collectionName || "Unknown Collection" }
+            ]}
+            detail={
+              <List.Item.Detail
+                markdown={selectedDocument?.text || "Select a document to preview"}
+                metadata={
+                  selectedDocument
+                    ? <List.Item.Detail.Metadata>
+                        <List.Item.Detail.Metadata.Label title="Title" text={selectedDocument.title} />
+                        <List.Item.Detail.Metadata.Label title="Collection" text={selectedDocument.collectionName || "Unknown Collection"} />
+                        <List.Item.Detail.Metadata.Link title="Open in Browser" target={`${outlineUrl}${selectedDocument.url}`} text="Open" />
+                      </List.Item.Detail.Metadata>
+                    : null
+                }
+              />
+            }
+            actions={
+              <ActionPanel>
+                <Action title="Preview Document" onAction={() => setSelectedDocument(item.document)} />
+                <Action.OpenInBrowser url={`${outlineUrl}${item.document.url}`} />
+              </ActionPanel>
+            }
+          />
+        ))}
+      </List.Section>
     </List>
-  );
-}
-
-function DocumentDetail({ document }: { document: Document }) {
-  const { outlineUrl } = getPreferenceValues<{ outlineUrl: string }>();
-  const fullUrl = `${outlineUrl}${document.url}`;
-
-  return (
-    <Detail
-      markdown={document.text}
-      metadata={
-        <Detail.Metadata>
-          <Detail.Metadata.Label title="ID" text={document.urlId} />
-          <Detail.Metadata.Label title="URL" text={document.url} />
-        </Detail.Metadata>
-      }
-      actions={
-        <ActionPanel>
-          <Action.OpenInBrowser url={fullUrl} />
-        </ActionPanel>
-      }
-    />
   );
 }

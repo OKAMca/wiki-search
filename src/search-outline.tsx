@@ -27,7 +27,7 @@ export default function SearchOutline() {
     }
   }, [collectionsError]);
 
-  if (error && debouncedSearchText.trim().length > 0) {
+  if (error && searchText.trim().length > 0) {
     showToast({
       style: Toast.Style.Failure,
       title: "Failed to search documents",

@@ -26,6 +26,12 @@ export interface Collection {
   color: string;
 }
 
+export interface Collection {
+  id: string;
+  name: string;
+  color: string;
+}
+
 export interface CollectionsResponse {
   data: Collection[];
   pagination: {
@@ -62,12 +68,22 @@ interface SearchResponse {
   data: SearchResponseItem[];
 }
 
-export function useSearchDocuments(query: string, options?: { execute?: boolean }) {
+export function useSearchDocuments(query: string, collectionId: string | null, options?: { execute?: boolean }) {
   const { outlineUrl, apiToken } = getPreferenceValues<Preferences>();
   const searchUrl = `${outlineUrl}/api/documents.search`;
 
   console.log(`Searching Outline at URL: ${searchUrl}`);
   console.log(`Search query: ${query}`);
+  console.log(`Collection ID: ${collectionId}`);
+
+  const body: { query: string; limit: number; collectionId?: string } = {
+    query: query,
+    limit: 100,
+  };
+
+  if (collectionId) {
+    body.collectionId = collectionId;
+  }
 
   return useFetch<SearchResponse>(
     searchUrl,
@@ -78,10 +94,7 @@ export function useSearchDocuments(query: string, options?: { execute?: boolean 
         Authorization: `Bearer ${apiToken}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        query: query,
-        limit: 100,
-      }),
+      body: JSON.stringify(body),
       onData: (data) => {
         console.log("API Response:", JSON.stringify(data, null, 2));
       },

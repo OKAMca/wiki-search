@@ -97,7 +97,7 @@ export function useSearchDocuments(query: string, collectionId: string | null, c
       body: JSON.stringify(body),
       onData: (data) => {
         console.log("API Response:", JSON.stringify(data, null, 2));
-        // Add collection names to the documents
+        // Add collection names to the documents using collectionsData
         data.data = data.data.map(item => ({
           ...item,
           document: {

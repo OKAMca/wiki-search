@@ -1,5 +1,5 @@
 import { List, ActionPanel, Action, showToast, Toast, getPreferenceValues, Icon, Detail } from "@raycast/api";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSearchDocuments, SearchResponseItem, Collection, useFetchCollections } from "./api/outline";
 
 export default function SearchOutline() {

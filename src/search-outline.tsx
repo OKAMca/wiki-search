@@ -8,14 +8,9 @@ export default function SearchOutline() {
   const { outlineUrl } = getPreferenceValues<{ outlineUrl: string }>();
 
   const { data: collectionsData, isLoading: isLoadingCollections, error: collectionsError } = useFetchCollections();
-  const { data, isLoading, error } = useSearchDocuments(
-    searchText,
-    selectedCollection?.id || null,
-    collectionsData,
-    {
-      execute: searchText.trim().length > 0,
-    },
-  );
+  const { data, isLoading, error } = useSearchDocuments(searchText, selectedCollection?.id || null, collectionsData, {
+    execute: searchText.trim().length > 0,
+  });
 
   useEffect(() => {
     if (collectionsError) {
@@ -65,7 +60,6 @@ export default function SearchOutline() {
           <List.Item
             key={item.document.id}
             title={item.document.title || "Untitled Document"}
-            accessories={[{ text: item.document.collectionName || "Unknown Collection" }]}
             detail={
               <List.Item.Detail
                 markdown={item.document.text}

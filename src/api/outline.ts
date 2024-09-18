@@ -12,6 +12,7 @@ export interface Document {
   url: string;
   title: string;
   text: string;
+  collectionId: string;
   collectionName?: string;
   createdAt: string;
   updatedAt: string;

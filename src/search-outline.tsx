@@ -89,6 +89,9 @@ export default function SearchOutline() {
 }
 
 function DocumentDetail({ document }: { document: Document }) {
+  const { outlineUrl } = getPreferenceValues<{ outlineUrl: string }>();
+  const fullUrl = `${outlineUrl}${document.url}`;
+
   return (
     <Detail
       markdown={document.text}
@@ -97,6 +100,11 @@ function DocumentDetail({ document }: { document: Document }) {
           <Detail.Metadata.Label title="ID" text={document.urlId} />
           <Detail.Metadata.Label title="URL" text={document.url} />
         </Detail.Metadata>
+      }
+      actions={
+        <ActionPanel>
+          <Action.OpenInBrowser url={fullUrl} />
+        </ActionPanel>
       }
     />
   );

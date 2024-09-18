@@ -1,6 +1,6 @@
 import { List, ActionPanel, Action, showToast, Toast, Detail, getPreferenceValues } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { useSearchDocuments, Document, SearchResponseItem, Collection, fetchCollections } from "./api/outline";
+import { useSearchDocuments, Document, SearchResponseItem, Collection, useFetchCollections } from "./api/outline";
 
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
@@ -21,29 +21,23 @@ function useDebounce<T>(value: T, delay: number): T {
 export default function SearchOutline() {
   const [searchText, setSearchText] = useState("");
   const [selectedCollection, setSelectedCollection] = useState<Collection | null>(null);
-  const [collections, setCollections] = useState<Collection[]>([]);
   const debouncedSearchText = useDebounce(searchText, 100);
   const { outlineUrl } = getPreferenceValues<{ outlineUrl: string }>();
 
+  const { data: collectionsData, isLoading: isLoadingCollections, error: collectionsError } = useFetchCollections();
   const { data, isLoading, error } = useSearchDocuments(debouncedSearchText, selectedCollection?.id || null, {
     execute: debouncedSearchText.trim().length > 0,
   });
 
   useEffect(() => {
-    async function loadCollections() {
-      try {
-        const fetchedCollections = await fetchCollections();
-        setCollections(fetchedCollections);
-      } catch (error) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to fetch collections",
-          message: (error as Error).message,
-        });
-      }
+    if (collectionsError) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to fetch collections",
+        message: collectionsError.message,
+      });
     }
-    loadCollections();
-  }, []);
+  }, [collectionsError]);
 
   if (error && debouncedSearchText.trim().length > 0) {
     showToast({
@@ -63,10 +57,10 @@ export default function SearchOutline() {
         <List.Dropdown
           tooltip="Select Collection"
           storeValue={true}
-          onChange={(id) => setSelectedCollection(collections.find((c) => c.id === id) || null)}
+          onChange={(id) => setSelectedCollection(collectionsData?.data.find((c) => c.id === id) || null)}
         >
           <List.Dropdown.Item key="all" title="All Collections" value="" />
-          {collections.map((collection) => (
+          {collectionsData?.data.map((collection) => (
             <List.Dropdown.Item
               key={collection.id}
               title={collection.name}

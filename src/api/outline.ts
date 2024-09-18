@@ -40,22 +40,21 @@ export interface CollectionsResponse {
   };
 }
 
-export async function fetchCollections(): Promise<Collection[]> {
-  const response = await fetch(`${preferences.outlineUrl}/api/collections.list`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${preferences.apiToken}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ limit: 100 }), // Adjust the limit as needed
-  });
+export function useFetchCollections() {
+  const { outlineUrl, apiToken } = getPreferenceValues<Preferences>();
+  const collectionsUrl = `${outlineUrl}/api/collections.list`;
 
-  if (!response.ok) {
-    throw new Error(`Failed to fetch collections: ${response.statusText}`);
-  }
-
-  const data: CollectionsResponse = await response.json();
-  return data.data;
+  return useFetch<CollectionsResponse>(
+    collectionsUrl,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ limit: 100 }), // Adjust the limit as needed
+    }
+  );
 }
 
 interface SearchResponse {

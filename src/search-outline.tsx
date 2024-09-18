@@ -26,9 +26,14 @@ export default function SearchOutline() {
   const { outlineUrl } = getPreferenceValues<{ outlineUrl: string }>();
 
   const { data: collectionsData, isLoading: isLoadingCollections, error: collectionsError } = useFetchCollections();
-  const { data, isLoading, error } = useSearchDocuments(debouncedSearchText, selectedCollection?.id || null, collectionsData, {
-    execute: debouncedSearchText.trim().length > 0,
-  });
+  const { data, isLoading, error } = useSearchDocuments(
+    debouncedSearchText,
+    selectedCollection?.id || null,
+    collectionsData,
+    {
+      execute: debouncedSearchText.trim().length > 0,
+    },
+  );
 
   useEffect(() => {
     if (collectionsError) {
@@ -78,21 +83,25 @@ export default function SearchOutline() {
           <List.Item
             key={item.document.id}
             title={item.document.title || "Untitled Document"}
-            subtitle={item.context}
-            accessories={[
-              { text: item.document.collectionName || "Unknown Collection" }
-            ]}
+            accessories={[{ text: item.document.collectionName || "Unknown Collection" }]}
             detail={
               <List.Item.Detail
                 markdown={selectedDocument?.text || "Select a document to preview"}
                 metadata={
-                  selectedDocument
-                    ? <List.Item.Detail.Metadata>
-                        <List.Item.Detail.Metadata.Label title="Title" text={selectedDocument.title} />
-                        <List.Item.Detail.Metadata.Label title="Collection" text={selectedDocument.collectionName || "Unknown Collection"} />
-                        <List.Item.Detail.Metadata.Link title="Open in Browser" target={`${outlineUrl}${selectedDocument.url}`} text="Open" />
-                      </List.Item.Detail.Metadata>
-                    : null
+                  selectedDocument ? (
+                    <List.Item.Detail.Metadata>
+                      <List.Item.Detail.Metadata.Label title="Title" text={selectedDocument.title} />
+                      <List.Item.Detail.Metadata.Label
+                        title="Collection"
+                        text={selectedDocument.collectionName || "Unknown Collection"}
+                      />
+                      <List.Item.Detail.Metadata.Link
+                        title="Open in Browser"
+                        target={`${outlineUrl}${selectedDocument.url}`}
+                        text="Open"
+                      />
+                    </List.Item.Detail.Metadata>
+                  ) : null
                 }
               />
             }
